@@ -1,0 +1,29 @@
+services:
+  dpsrv-kafka:
+    container_name: dpsrv-kafka-${tag:-latest}
+    image: confluentinc/cp-kafka:7.6.1
+    env_file:
+      - ${DPSRV_HOME}/rc/secrets/kafka/kafka.env
+      - ${DPSRV_HOME}/rc/secrets/local/${HOSTNAME}/local.env
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: $HOSTNAME.dpsrv.me
+    ports:
+      - 9092:9092
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    restart: no
+  kafka-ui:
+    container_name: dpsrv-kafka-ui-${tag:-latest}
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      - dpsrv-kafka
+    ports:
+      - 8080:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    volumes:
+      - ${DPSRV_HOME}/rc/secrets/kafka/ui/:/etc/kafkaui/
+networks:
+  default:
+    name: dpsrv
+    external: true
